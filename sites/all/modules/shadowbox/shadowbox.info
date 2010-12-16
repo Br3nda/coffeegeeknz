@@ -1,0 +1,11 @@
+; $Id: shadowbox.info,v 1.1.2.2.2.2 2009/02/09 10:27:29 psynaptic Exp $
+name = Shadowbox
+description = Allows content to be displayed in a JavaScript modal media viewer application.
+core = 6.x
+
+; Information added by drupal.org packaging script on 2010-06-15
+version = "6.x-4.2"
+core = "6.x"
+project = "shadowbox"
+datestamp = "1276621808"
+
