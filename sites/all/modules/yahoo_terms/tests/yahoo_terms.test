@@ -1,0 +1,133 @@
+<?php
+// $Id: yahoo_terms.test,v 1.5.2.2 2010/10/20 20:54:53 taniwha Exp $
+
+/**
+ * @file
+ * Unit Tests for yahoo_terms module
+ * http://drupal.org/node/265762
+ */
+
+class YahooTermsTestCase extends DrupalWebTestCase {
+
+  /**
+   * User with rights to post SimpleTest Example content.
+   */
+  protected $privileged_user;
+
+
+  protected $text_blurb = "
+The Batch API module lets you easily set a batch of callbacks that Drupal will run one at a time, thus avoiding script timeouts for laborious tasks. The batch can be naturally set up in your form submit handler, or can be called in any other function by adding one extra line of code.
+drupal_execute() is not happy
+
+One problem that I ran into along the way was the discovery that drupal_execute() has some compatibility issues with the Batch API. If I tried to use drupal_execute() in my batch callbacks, it would fail. Luckily there was a link to this tip to pause the batch that allowed the batch functions to use drupal_execute() with no complaints.
+
+Batching makes me happy
+
+So, I just got done batch exporting 88 items including 19 super complex content types, 64 views and 4 vocabularies (one containing over 100 terms) and all it only took a few clicks. The Batch API is an amazing time saver. Combining it with some other awesome community tools like Import/Export gives me time to go take a much needed coffee break :)
+";
+
+  /**
+   * getInfo() returns properties that are displayed in the test selection form.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Yahoo Terms',
+      'description' => 'tests for the Yahoo Terms',
+      'group' => 'Yahoo Terms',
+    );
+  }
+
+  /**
+   * setUp() performs any pre-requisite tasks that need to happen. 
+   */
+  public function setUp() {
+    // Enable any modules required for the test.
+    parent::setUp('yahoo_terms', 'taxonomy');
+
+    // Create and log in our privileged user.
+    $this->privileged_user = $this->drupalCreateUser( array('yahoo_terms_usage'));
+  }
+
+  function testNoAdminAccess() {
+    $this->drupalGet('admin/settings/yahoo_terms');
+    $this->assertResponse(403);
+  }
+
+  /**
+   * Test saving your settings
+   */
+  public function testSavingsettings() {
+  
+    $this->drupalLogin($this->privileged_user);
+
+    $this->drupalGet('admin/settings/yahoo_terms');
+    $edit = array(
+      'yahoo_terms_appid' => 'Yahoo Terms module unittests',
+      'yahoo_terms_taxonomy_limit' => '-1',
+    );
+    $this->drupalPost('admin/settings/yahoo_terms', $edit, 'Save configuration');
+    $this->assertResponse(200);
+
+  
+    $this->drupalGet('admin/settings/yahoo_terms');
+    $this->assertRaw('Yahoo Terms module unittests');
+    $this->assertResponse(200);
+    $this->drupalLogout();
+
+
+    
+  }
+  function testHelpfulHelp() {
+    $settings = array(
+      'type' => 'story', // This replaces the default type
+      'title' => $this->randomName(), // This appends a new field.
+      'body' => 'HELLO WORLD ', $this->text_blurb,
+    );
+    $node = $this->drupalCreateNode($settings);
+    $this->drupalLogin($this->privileged_user);
+    $this->drupalGet('node/'. $node->nid);
+    $this->clickLink('Add Yahoo Terms');
+    $this->assertText('Please configure the Yahoo Terms module before use.');
+    
+  }
+
+  /**
+   * Test of making a node and auto tagging it.
+   */
+  function testCreateNodeAndTag() {
+    //configure
+    $this->testSavingsettings();
+
+    $settings = array(
+      'type' => 'story', // This replaces the default type
+      'title' => $this->randomName(), // This appends a new field.
+      'body' => 'HELLO WORLD '. $this->text_blurb,
+    );
+    $node = $this->drupalCreateNode($settings);
+
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText('HELLO WORLD');
+    $this->assertNoRaw('Add Yahoo Terms');
+
+    $this->drupalLogin($this->privileged_user);
+
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText('HELLO WORLD');
+    $this->clickLink('Add Yahoo Terms');
+
+    $this->assertText('Tags returned by Yahoo Terms service =');
+    $this->assertText('laborious tasks,'); 
+    $this->assertText('community tools,');
+    $this->assertText('content types,');
+
+    //batch operations, compatibility issues, callback function, callbacks, php function, timeouts, error message, amp, logic, discovery
+
+    $this->drupalLogout();
+  }
+
+
+
+
+
+
+}

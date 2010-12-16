@@ -1,0 +1,12 @@
+; $Id: yahoo_terms.info,v 1.4 2010/09/15 22:38:06 taniwha Exp $
+name = "Yahoo Terms Extractor"
+description = "Extract terms from English language texts and nodes and save into the taxonomy hierarchy"
+core = 6.x
+dependencies[] = taxonomy
+
+; Information added by drupal.org packaging script on 2010-10-21
+version = "6.x-7.2"
+core = "6.x"
+project = "yahoo_terms"
+datestamp = "1287624373"
+
