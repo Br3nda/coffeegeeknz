@@ -1,3 +1,23 @@
+drupal-site-coffeegeeknz (20101216-4) unstable; urgency=low
+
+  * Views and admin modules
+
+ -- Brenda Wallace <shiny@cpan.org>  Thu, 16 Dec 2010 20:55:58 +1300
+
+drupal-site-coffeegeeknz (20101216-3) unstable; urgency=low
+
+  * Added theme back
+  *  boost
+  *  and yahoo_terms
+
+ -- Brenda Wallace <shiny@cpan.org>  Thu, 16 Dec 2010 20:52:04 +1300
+
+drupal-site-coffeegeeknz (20101216-2) unstable; urgency=low
+
+  * changed name
+
+ -- Brenda Wallace <shiny@cpan.org>  Thu, 16 Dec 2010 14:50:56 +1300
+
 drupal-site-gargi (20101216-1) unstable; urgency=low
 
   * deb on the shiny new server

@@ -1,5 +1,5 @@
 <?php
-    $options["dh-project"] = 'gargi';
+    $options["dh-project"] = 'coffeegeeknz';
     $options["dh-bump-version"] = true;
-    $options["dh-build-dir"] = '/tmp/drupal-site-gargi';
+    $options["dh-build-dir"] = '/tmp/drupal-site-coffeegeeknz';
 
