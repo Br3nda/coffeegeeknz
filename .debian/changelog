@@ -1,3 +1,9 @@
+drupal-site-coffeegeeknz (20101216-8) unstable; urgency=low
+
+  * added the shadowbox library
+
+ -- Brenda Wallace <shiny@cpan.org>  Thu, 16 Dec 2010 21:59:26 +1300
+
 drupal-site-coffeegeeknz (20101216-7) unstable; urgency=low
 
   * date
