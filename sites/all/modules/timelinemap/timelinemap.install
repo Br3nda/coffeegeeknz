@@ -1,0 +1,222 @@
+<?php
+// $Id: timelinemap.install,v 1.3 2010/08/02 13:49:48 vesnaradivojevic Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function timelinemap_schema() {
+  $schema['timelinemap_embeds'] = array(
+    'description' => 'Embed visualization files (html) made by timelinemap module',
+    'fields' => array(
+      'fid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'File id of the embed file.',
+      ),
+	  'title' => array(
+        'type' => 'varchar',
+        'length' => 60,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'Title of the visualization.',
+      ),  
+      'link_view' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'Link to the edit form in Views module.',
+      ),
+      'link_vidi' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'Link to the edit form in VIDI module.',
+      ),      
+      'datasource' => array(
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'Type of timeline map.',
+      ),        
+      'form_state' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Form_state for VIDI module.',
+      ),
+      'visualisation_code' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Iframe for visualization.',
+      ),       
+    ),
+    'primary key' => array('fid'),
+  );
+  
+  $schema['timelinemap_layers'] = array(
+    'description' => 'The layers for map',
+    'fields' => array(
+      'lid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Unique ID for table.',
+      ),    
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The name of the layer/overlay.',
+      ),           
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The title of the layer/overlay.',
+      ),  
+      'baselayer' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+        'description' => 'Is the new layer a baselayer.',
+      ),
+      'options' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => FALSE,
+        'description' => 'The serialized options for the layer.',
+      ),        
+                       
+    ),
+    'primary key' => array('lid'),
+  );      
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function timelinemap_install() {
+  // Create tables
+  drupal_install_schema('timelinemap');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function timelinemap_uninstall() {
+  drupal_uninstall_schema('timelinemap');
+  variable_del('timelinemap_api_key');
+}
+
+function timelinemap_update_6100() {
+  $ret = array();
+  if(!db_table_exists('timelinemap_embeds')){
+    $schema['timelinemap_embeds'] = array(
+      'description' => 'Embed visualization files (html) made by timelinemap module',
+      'fields' => array(
+        'fid' => array(
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'description' => 'File id of the embed file.',
+        ),
+	    'title' => array(
+          'type' => 'varchar',
+          'length' => 60,
+          'not null' => FALSE,
+          'default' => '',
+          'description' => 'Title of the visualization.',
+        ),  
+        'link_view' => array(
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => FALSE,
+          'default' => '',
+          'description' => 'Link to the edit form in Views module.',
+        ),
+        'link_vidi' => array(
+          'type' => 'varchar',
+		  'length' => 255,
+          'not null' => FALSE,
+          'default' => '',
+          'description' => 'Link to the edit form in VIDI module.',
+        ),      
+        'datasource' => array(
+          'type' => 'varchar',
+          'length' => 20,
+          'not null' => FALSE,
+          'default' => '',
+          'description' => 'Type of timeline map.',
+        ),        
+        'form_state' => array(
+          'type' => 'text',
+          'size' => 'big',
+          'not null' => FALSE,
+          'description' => 'Form_state for VIDI module.',
+        ),
+        'visualisation_code' => array(
+          'type' => 'text',
+          'size' => 'big',
+          'not null' => FALSE,
+          'description' => 'Iframe for visualization.',
+        ),       
+       ),
+      'primary key' => array('fid'),
+    );
+	db_create_table($ret, 'timelinemap_embeds', $schema['timelinemap_embeds']);
+  }
+  if(!db_table_exists('timelinemap_layers')){
+    $schema['timelinemap_layers'] = array(
+      'description' => 'The layers for map',
+      'fields' => array(
+        'lid' => array(
+          'type' => 'serial',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'description' => 'Unique ID for table.',
+        ),    
+        'name' => array(
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'default' => '',
+          'description' => 'The name of the layer/overlay.',
+        ),           
+        'title' => array(
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'default' => '',
+          'description' => 'The title of the layer/overlay.',
+        ),  
+        'baselayer' => array(
+          'type' => 'int',
+          'size' => 'tiny',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 1,
+          'description' => 'Is the new layer a baselayer.',
+        ),
+        'options' => array(
+          'type' => 'text',
+          'size' => 'normal',
+          'not null' => FALSE,
+          'description' => 'The serialized options for the layer.',
+        ),                               
+      ),
+      'primary key' => array('lid'),
+     );
+    db_create_table($ret, 'timelinemap_layers', $schema['timelinemap_layers']);	 
+  }
+  return $ret;
+} 

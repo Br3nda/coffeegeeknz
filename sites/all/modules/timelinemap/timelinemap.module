@@ -1,0 +1,375 @@
+<?php
+// $Id: timelinemap.module,v 1.2 2010/07/14 14:55:16 vesnaradivojevic Exp $
+
+/**
+ * @file
+ * Module providing a scrollable timeline view with map for Drupal events and nodes.
+ */
+ 
+/**
+ *  Implements hook_views_api().
+ */
+function timelinemap_views_api() {
+  return array(
+    'api' => 2.0,
+  );
+}
+
+/**
+ *  Implements hook_perm().
+ */
+function timelinemap_perm (){
+  return array('embed timeline map', 'administer timelinemap embeds');  
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function timelinemap_theme() {
+  return array(
+    'timelinemap_print_title' => array(
+      'arguments' => array('row' => NULL, 'alias' => NULL),
+    ),
+    'timelinemap_print_url' => array(
+      'arguments' => array('row' => NULL, 'link_enabled' => NULL),
+    ),
+	'timelinemap_rearrange_form' => array(
+      'arguments' => array('row' => NULL),
+    ),
+   'timelinemap_admin_vis' => array(
+      'arguments' => array('row' => NULL),
+    ),
+   'timelinemap_get_my_visualizations' => array(
+      'arguments' => array('form' => NULL),
+    ),
+    'timelinemap_list_layers' => array(
+      'arguments' => array('form' => NULL),
+    ),	
+  );
+}
+
+/**
+ * Overridable theme function.
+ * This returns the title of each event bubble on the timeline.
+ */
+function theme_timelinemap_print_title($row, $alias) {
+  return $row->$alias;
+}
+
+/**
+ * Overridable theme function.
+ * This creates the url that the title of each event bubble is linked to.
+ */
+function theme_timelinemap_print_url($row, $link_enabled) {
+  if ($link_enabled) {
+    return base_path() . drupal_get_path_alias('node/' . $row->nid);
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function timelinemap_menu() {
+  $items['admin/settings/timelinemap'] = array(
+    'title' => 'Timelinemap',
+    'description' => 'Configure Timelinemap settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('timelinemap_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/settings/timelinemap/settings'] = array(
+    'title' => 'Timelinemap settings',
+    'description' => 'Configure Timelinemap settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('timelinemap_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['timelinemap/embed'] = array(
+    'page callback' => 'timelinemap_embed',
+    'access arguments' => array('embed timeline map'),
+    'file' => 'timelinemap_embed_map.inc', 
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/content/timelinemap/embeds'] = array(
+    'title' => 'Timelinemap embed files',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('timelinemap_admin_embeds_controller'),
+    'access arguments' => array('embed timeline map'),
+    'type' => MENU_NORMAL_ITEM,
+	 'file' => 'timelinemap_embed_map.inc', 
+  ); 
+  $items['timelinemap/embed_ahah'] = array(
+    'page callback' => 'timelinemap_embed_ahah',
+    'access arguments' => array('administer timelinemap embeds'),
+    'file' => 'timelinemap_embed_map.inc', 
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['admin/settings/timelinemap/layers'] = array(
+    'title' => 'Layer management',
+    'description' => 'manage custom layers and overlays',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('timelinemap_layer_list_controller'),    
+    'access arguments' => array('administer site configuration'),
+    'file' => 'timelinemap_layers.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1
+  );   
+  
+  $items['admin/settings/timelinemap/layers/layerlist'] = array(
+    'title' => 'Layer list',
+    'description' => 'Manage custom layers and overlays',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('timelinemap_layer_list_controller'),    
+    'access arguments' => array('administer site configuration'),
+    'file' => 'timelinemap_layers.inc',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1
+  );    
+  
+  $items['admin/settings/timelinemap/layers/addlayer'] = array(
+    'title' => 'Add new layer',
+    'description' => 'Add a new layer and overlay',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('timelinemap_add_new_layer_form'),    
+    'access arguments' => array('administer site configuration'),
+    'file' => 'timelinemap_layers.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2
+  );
+  
+  $items['admin/settings/timelinemap/layers/importlayer'] = array(
+    'title' => 'Import layer',
+    'description' => 'Import a layer',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('timelinemap_import_layer_form'),    
+    'access arguments' => array('administer site configuration'),
+    'file' => 'timelinemap_layers.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3
+  );  
+  
+  $items['admin/settings/timelinemap/layers/edit/%timelinemap_layer'] = array(
+    'title' => 'Edit layer',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('timelinemap_layer_edit_form'),    
+    'access arguments' => array('administer site configuration'),
+    'file' => 'timelinemap_layers.inc',  
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['admin/settings/timelinemap/layers/export/%timelinemap_layer'] = array(
+    'title' => 'Export layer',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('timelinemap_layer_export_form'),    
+    'access arguments' => array('administer site configuration'),
+    'file' => 'timelinemap_layers.inc',  
+    'type' => MENU_CALLBACK,
+  );
+    $items['timelinemap/add_layer_js'] = array(
+    'page callback' => 'timelinemap_add_layer_js',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'timelinemap_layers.inc', 
+    'type' => MENU_CALLBACK,
+  ); 
+  return $items;
+}
+
+function timelinemap_layer_load($lid) {
+  if (!is_numeric($lid)) {
+    return FALSE;
+  }
+  $layer = db_result(db_query("SELECT lid FROM {timelinemap_layers} WHERE lid=%d", $lid));
+  if (!isset($layer)) {
+    return FALSE;
+  }
+  return $layer;  
+}
+
+/**
+* Timelinemap settings form
+*/
+function timelinemap_admin_settings(&$form_state) {
+  // if Google map api key exists use it
+  if (!module_exists('keys_api')) {
+  	$timelinemap_api_key = variable_get('timelinemap_api_key', '');
+	if ($timelinemap_api_key == '' && module_exists('gmap'))
+		$timelinemap_api_key = variable_get('googlemap_api_key', ''); 
+    if ($timelinemap_api_key == '' && module_exists('tagmap'))
+		$timelinemap_api_key = variable_get('tagmap_api_key', ''); 
+    if ($timelinemap_api_key == '' && module_exists('gvs'))
+		$timelinemap_api_key = variable_get('gvs_api_key', ''); 
+    if ($timelinemap_api_key == '' && module_exists('gearth'))
+		$timelinemap_api_key = variable_get('ct_gearth_api_key', ''); 			
+  
+    $form['initialization']['timelinemap_api_key'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Google Maps API Key'),
+      '#default_value' => $timelinemap_api_key,
+      '#size' => 50,
+      '#maxlength' => 255,
+      '#description' => t('Your personal Googlemaps API key. You must get this for each separate website at <a href="http://www.google.com/apis/maps/">Google Map API website</a>.'),
+    );
+   } 
+  else {
+    $form['initialization']['timelinemap_api_key'] = array(
+      '#type' => 'item',
+      '#title' => t('Google Maps API Key'),
+      '#description' => t('Your personal Googlemaps API key.  You must get this for each separate website at <a href="http://www.google.com/apis/maps/">Google Map API website</a>.'),
+      '#value' => t("Managed by <a href='@url'>keys api</a>.", array('@url' => url('admin/settings/keys'))),
+    );
+  }
+  // Display settings
+  $form['display'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Default display settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  
+  //map and timeline width
+  $form['display']['timelinemap_default_width'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Default width'),
+    '#default_value' => variable_get('timelinemap_default_width', '100%'),
+    '#size'          => 6,
+    '#maxlength'     => 6,
+    '#description'   => t('The default width of a timeline (in units of em, px or %), e.g. 600px or 90%.'),
+    '#required'      => TRUE,
+  );
+  
+  //timeline height
+  $form['display']['timelinemap_default_tlheight'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Default timeline height'),
+    '#default_value' => variable_get('timelinemap_default_tlheight', '400px'),
+    '#size'          => 6,
+    '#maxlength'     => 6,
+    '#description'   => t('The default height of a timeline (in units of em, px or %), e.g. 400px.'),
+    '#required'      => TRUE,
+  );
+  //map height
+  $form['display']['timelinemap_default_mheight'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Default map height'),
+    '#default_value' => variable_get('timelinemap_default_mheight', '400px'),
+    '#size'          => 6,
+    '#maxlength'     => 6,
+    '#description'   => t('The default height of a map (in units of em, px or %), e.g. 400px.'),
+    '#required'      => TRUE,
+  );
+  
+  return system_settings_form($form);
+}
+
+/**
+ * Converts different expected date formats to one global date format to talk to the timelinemap.
+ * Respects drupal's timezone handling.
+ *
+ * @return
+ *   date in defined output
+ *
+ * Notes: -fd
+ * 1. Adding "Z" to ISO-Date
+ * 2. Using two date_convert functions to be able to respect timezones.
+ * 3. Drupal's global timezone settings are taken. Not the date field specific settings.
+ */
+function timelinemap_date_conversion($date, $input_format, $output_format = 'iso8601') {
+  switch ($input_format) {
+    case 'date':
+    case 'iso8601':
+      switch ($output_format) {
+        case 'iso8601':
+          return date_convert(date_convert($date, DATE_ISO, DATE_UNIX), DATE_UNIX, DATE_ISO, date_get_timezone('date')) . 'Z';
+        case 'gregorian':
+          if (variable_get('date_api_version', 0) >= 5.2) {
+            return format_date(date_convert($date, DATE_ISO, DATE_UNIX) + timelinemap_get_timezone(), 'custom', 'M d Y G:i:s', '0', 'en');
+          }
+          else {
+            return format_date(strtotime($date) + timelinemap_get_timezone(), 'custom', 'M d Y G:i:s', '0', 'en');
+          }
+        case 'timestamp':
+          return date_convert($date, DATE_ISO, DATE_UNIX) + timelinemap_get_timezone();
+      }
+    case 'datetime': 
+      switch ($output_format) {
+        case 'iso8601':
+          return date_convert(date_convert($date, DATE_DATETIME, DATE_UNIX), DATE_UNIX, DATE_ISO, date_get_timezone('date')) . 'Z';
+        case 'gregorian':
+          return format_date(date_convert($date, DATE_DATETIME, DATE_UNIX)  + timelinemap_get_timezone(), 'custom', 'M d Y G:i:s', '0', 'en');
+        case 'timestamp':
+          return date_convert($date, DATE_DATETIME, DATE_UNIX) + timelinemap_get_timezone();
+      }
+    case 'datestamp':
+    case 'timestamp':
+      switch ($output_format) {
+        case 'iso8601':
+          if (variable_get('date_api_version', 0) >= 5.2) {
+            return date_convert($date, DATE_UNIX, DATE_ISO, date_get_timezone('date')) . 'Z';
+          }
+          else {
+            return format_date($date + timelinemap_get_timezone(), 'custom', 'Y-m-d\TH:i:s\Z', '0', 'en');
+          }
+        case 'gregorian':
+          return format_date($date + timelinemap_get_timezone(), 'custom', 'M d Y G:i:s', '0', 'en');
+        case 'timestamp':
+          return $date + timelinemap_get_timezone();
+      }
+  }
+}
+  /**
+ * Returns the currently logged-in user's timezone, in seconds from GMT.
+ *
+ * @return an integer representation of a timezone
+ */
+function timelinemap_get_timezone($unit = 'seconds') {
+  global $user;
+  return (variable_get('configurable_timezones', 1) && $user->uid && drupal_strlen($user->timezone)) ?
+    (integer)$user->timezone : (integer)variable_get('date_default_timezone', 0);
+}
+
+function _timelinemap_width_to_dim($string) {
+  return intval($string) . (strpos($string, '%') !== FALSE ? '%' : 'px');
+}
+function _timelinemap_to_dim($string) {
+  return intval($string) . (strpos($string, 'em') !== FALSE ? 'em' : 'px');
+}
+/**
+ * Turn the rearrange form into a proper table
+ */
+function theme_timelinemap_rearrange_form($form) {
+  $rows = array();
+  foreach (element_children($form) as $id) {
+    if (isset($form[$id]['name'])) {
+      $row = array();
+      $row[] = drupal_render($form[$id]['name']);
+      $form[$id]['weight']['#attributes']['class'] = 'weight';
+      $row[] = drupal_render($form[$id]['weight']);
+      $row[] = drupal_render($form[$id]['added']);
+
+      $rows[] = array('data' => $row, 'class' => 'draggable', 'id' => 'views-row-' . $id);
+    }
+  }
+  if (empty($rows)) {
+    $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
+  }
+
+  $header = array('', t('Weight'), t('Add'));
+  drupal_add_tabledrag('arrange', 'order', 'sibling', 'weight');
+  $output = drupal_render($form['override']);
+  $output .= theme('table', $header, $rows, array('id' => 'arrange'));
+  $output .= drupal_render($form);
+  return $output;
+}
+
+function _timelinemap_element_sort($a, $b) {
+  $a_weight = (is_array($a) && isset($a['weight'])) ? $a['weight'] : 0;
+  $b_weight = (is_array($b) && isset($b['weight'])) ? $b['weight'] : 0;
+  if ($a_weight == $b_weight) {
+    return 0;
+  }
+  return ($a_weight < $b_weight) ? -1 : 1;
+}
