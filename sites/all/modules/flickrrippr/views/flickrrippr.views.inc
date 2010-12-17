@@ -498,6 +498,9 @@ class flickrrippr_handler_photo extends views_handler_field   {
     $node->nid = $values->nid;
     flickrrippr_load($node);
     $src = flickrrippr_path($node, $this->options['photo_size']);
+    if (empty($src)) {
+      return;
+    }
     $image = theme('image', $src, $values->node_title, $values->node_title, NULL, FALSE);
 
     return $image;
