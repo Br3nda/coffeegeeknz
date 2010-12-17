@@ -1,0 +1,8 @@
+Changelog:
+
+version 6.x-1.6:
+
+Fixed issues:
+http://drupal.org/node/355019 (Change layout, added fieldset)
+http://drupal.org/node/679102 (Uncrosspost manually deleted entry, patch by lancelot)
+http://drupal.org/node/680014 (Extra break for empty body, suggested by Alex_Tutubalin, patch by valthebald)
