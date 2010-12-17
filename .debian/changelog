@@ -1,3 +1,18 @@
+drupal-site-coffeegeeknz (20101217-1) unstable; urgency=low
+
+  * Jobqueue
+  *  image
+  *  pathauto
+  *  token
+
+ -- Brenda Wallace <shiny@cpan.org>  Fri, 17 Dec 2010 14:28:03 +1300
+
+drupal-site-coffeegeeknz (20101216-9) unstable; urgency=low
+
+  * cck module
+
+ -- Brenda Wallace <shiny@cpan.org>  Thu, 16 Dec 2010 22:08:00 +1300
+
 drupal-site-coffeegeeknz (20101216-8) unstable; urgency=low
 
   * added the shadowbox library
