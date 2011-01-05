@@ -1,0 +1,13 @@
+name = Flickr Rippr Batch Import
+description = Import all of a flickr stream, in batch mode
+package = Flickr
+
+core = 6.x
+dependencies[] = flickrrippr
+
+; Information added by drupal.org packaging script on 2010-10-09
+version = "6.x-1.2"
+core = "6.x"
+project = "flickrbatchimport"
+datestamp = "1286658665"
+

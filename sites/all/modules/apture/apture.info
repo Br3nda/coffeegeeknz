@@ -1,0 +1,12 @@
+; $Id: apture.info,v 1.2.4.3 2009/06/30 20:09:55 ubicity Exp $
+name = "Apture"
+description = "Apture module"
+package = "Other"
+core = 6.x
+
+; Information added by drupal.org packaging script on 2009-08-11
+version = "6.x-1.7"
+core = "6.x"
+project = "apture"
+datestamp = "1250023520"
+
