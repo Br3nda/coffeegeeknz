@@ -1,3 +1,9 @@
+drupal-site-coffeegeeknz (20110105-1) unstable; urgency=low
+
+  * so many missing module
+
+ -- Brenda Wallace <shiny@cpan.org>  Wed, 5 Jan 2011 21:15:58 +1300
+
 drupal-site-coffeegeeknz (20101217-2) unstable; urgency=low
 
   * fix views in flickrirppr
