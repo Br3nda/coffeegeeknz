@@ -1,3 +1,9 @@
+drupal-site-coffeegeeknz (20110105-2) unstable; urgency=low
+
+  * changelog badded back
+
+ -- Brenda Wallace <shiny@cpan.org>  Wed, 5 Jan 2011 21:16:38 +1300
+
 drupal-site-coffeegeeknz (20110105-1) unstable; urgency=low
 
   * so many missing module
