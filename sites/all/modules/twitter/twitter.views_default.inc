@@ -1,5 +1,4 @@
 <?php
-// $Id: twitter.views_default.inc,v 1.1 2008/06/18 03:34:33 eaton Exp $
 
 function twitter_views_default_views() {
   $view = new view;

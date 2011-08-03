@@ -1,5 +1,4 @@
 <?php
-// $Id: twitter_signin.pages.inc,v 1.1.2.2 2010/01/23 23:27:21 walkah Exp $
 
 function twitter_signin_admin_settings() {
   $form = array();

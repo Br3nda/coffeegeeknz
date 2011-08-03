@@ -1,5 +1,4 @@
 <?php
-// $Id: twitter.lib.php,v 1.1.2.6 2010/10/20 15:18:10 walkah Exp $
 
 /**
  * @file
@@ -28,7 +27,7 @@ class Twitter {
   /**
    * @var $host The host to query against
    */
-  protected $host = 'twitter.com';
+  protected $host = 'api.twitter.com';
 
   /**
    * @var $source the twitter api 'source'
@@ -49,9 +48,7 @@ class Twitter {
    * Constructor for the Twitter class
    */
   public function __construct($username = NULL, $password = NULL) {
-    if (!empty($username) && !empty($password)) {
-      $this->set_auth($username, $password);
-    }
+    $this->set_auth($username, $password);
   }
 
   /**
@@ -154,7 +151,7 @@ class Twitter {
    *
    * @see http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-users%C2%A0show
    */
-  public function users_show($id) {
+  public function users_show($id, $use_auth = TRUE) {
     $params = array();
     if (is_numeric($id)) {
       $params['user_id'] = $id;
@@ -163,7 +160,7 @@ class Twitter {
       $params['screen_name'] = $id;
     }
 
-    $values = $this->call('users/show', $params, 'GET', TRUE);
+    $values = $this->call('users/show', $params, 'GET', $use_auth);
     return new TwitterUser($values);
   }
 
@@ -185,7 +182,7 @@ class Twitter {
    */
   public function call($path, $params = array(), $method = 'GET', $use_auth = FALSE) {
     $url = $this->create_url($path);
-
+    
     try {
       if ($use_auth) {
         $response = $this->auth_request($url, $params, $method);
@@ -258,7 +255,17 @@ class Twitter {
 
     switch ($format) {
       case 'json':
-        return json_decode($response, TRUE);
+        $response_decoded = json_decode($response, TRUE);
+        if ($response_decoded['id_str']) {
+          // if we're getting a single object back as JSON
+          $response_decoded['id'] = $response_decoded['id_str'];
+        } else {
+          // if we're getting an array of objects back as JSON
+          foreach ($response_decoded as &$item) {
+            $item['id'] = $item['id_str'];
+          }
+        }
+        return $response_decoded;
     }
   }
 

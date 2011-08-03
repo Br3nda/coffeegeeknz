@@ -1,5 +1,4 @@
 <?php
-// $Id: twitter.module,v 1.10.2.6 2010/10/20 15:48:19 walkah Exp $
 
 /**
  * Implementation of hook_meu()
@@ -34,7 +33,8 @@ function twitter_menu() {
     'title' => 'Twitter accounts',
     'page callback' => 'twitter_user_settings',
     'page arguments' => array(1),
-    'access arguments' => array('add twitter accounts'),
+    'access callback' => 'twitter_edit_access',
+    'access arguments' => array(1),
     'load arguments' => array('%map', '%index'),
     'weight' => 10,
     'file' => 'twitter.pages.inc',
@@ -53,11 +53,18 @@ function twitter_menu() {
   return $items;
 }
 
+ /**
+ * Access callback for twitter account editing.
+ */
+function twitter_edit_access($account) {
+  return user_edit_access($account) && user_access('add twitter accounts');
+}
+
 /**
  * Implementation of hook_perm()
  */
 function twitter_perm() {
-  return array('add twitter accounts', 'use global twitter account', 'make twitter accounts global');
+  return array('add twitter accounts', 'use global twitter account', 'make twitter accounts global', 'import own tweets');
 }
 
 /**

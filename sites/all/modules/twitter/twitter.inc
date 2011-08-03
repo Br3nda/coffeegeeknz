@@ -1,5 +1,4 @@
 <?php
-// $Id: twitter.inc,v 1.9.2.6 2010/02/16 00:51:17 walkah Exp $
 
 /**
  * Twitter API functions
@@ -29,7 +28,6 @@ function twitter_connect($account) {
 function twitter_account_save($twitter_user, $save_auth = FALSE, $account = NULL) {
   $values = (array)$twitter_user;
   $values['twitter_uid'] = $values['id'];
-
   if ($save_auth) {
     $values += $twitter_user->get_auth();
     if (empty($account)) {
@@ -55,6 +53,7 @@ function twitter_account_load($id) {
   $account->set_auth($values);
   $account->uid = $values['uid'];
   $account->import = $values['import'];
+  $account->include_retweets = $values['include_retweets'];
   $account->is_global = $values['is_global'];
   
   return $account;
@@ -68,7 +67,7 @@ function twitter_status_save($status) {
   $status->screen_name = $status->user->screen_name;
   $status->created_time = strtotime($status->created_at);
   
-  if (db_result(db_query("SELECT 1 FROM {twitter} WHERE twitter_id = %d", $status->id))) {
+  if (db_result(db_query("SELECT 1 FROM {twitter} WHERE twitter_id = %s", $status->id))) {
     drupal_write_record('twitter', $status, array('twitter_id'));
   }
   else {
@@ -100,6 +99,10 @@ function twitter_fetch_user_timeline($id) {
   $params = array();
   if ($since) {
     $params['since_id'] = $since;
+  }
+  
+  if ($account->include_retweets) {
+    $params['include_rts'] = true;
   }
 
   $statuses = $twitter->user_timeline($account->id, $params, $account->protected);

@@ -1,5 +1,4 @@
 <?php
-// $Id: twitter_post.module,v 1.1.2.1 2010/01/25 05:09:05 walkah Exp $
 
 /**
  * @file
@@ -59,7 +58,20 @@ function twitter_post_form_alter(&$form, $form_state, $form_id) {
     );
     $form['twitter'] += $twitter_form;
     $form['twitter']['status']['#default_value'] = variable_get('twitter_post_default_format', 'New post: !title !tinyurl');
-    $form['twitter']['status']['#description'] = t('The given text will be posted to twitter.com. You can use !url, !url-alias, !tinyurl, !title and !user as replacement text.');
+    $form['twitter']['status']['#description'] = t('The given text will be posted to twitter.com. You can use !url, !url-alias, !tinyurl, !title and !user as replacement text.  If the token module is enabled, you may also choose from the tokens listed in the replacement patterns section.');
+    if (module_exists('token')) {
+      $form['twitter']['token_help'] = array(
+        '#title' => t('Replacement patterns'),
+        '#type' => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#description' => t('Prefer raw-text replacements for text to avoid problems with HTML entities!'),
+      );
+
+      $form['twitter']['token_help']['help'] = array(
+        '#value' => theme('token_help', 'node'),
+      );
+    }
   }
 }
 
@@ -88,8 +100,21 @@ function twitter_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
         }
 
         $status = strtr($node->twitter['status'], $replacements);
+
+        // If token module is available, process status to do the token replacement
+        if (module_exists('token')) {
+          $status = token_replace($status, 'node', $node);
+        }
+
         try {
           $result = twitter_set_status($twitter_account, $status);
+          
+          // // TODO: resolve this failure, see http://drupal.org/node/335459
+          // if (!$result) {
+          //   $result = new stdClass;
+          //   $result->error = 'Sorry, there was an unkown error connecting to Twitter!';
+          //   throw new TwitterException();
+          // }
           drupal_set_message(t('Successfully posted to Twitter'));
         }
         catch (TwitterException $e) {

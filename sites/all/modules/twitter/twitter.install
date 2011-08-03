@@ -1,5 +1,4 @@
 <?php
-// $Id: twitter.install,v 1.3.2.4 2010/02/13 20:32:26 walkah Exp $
 
 /**
  * Implementation of hook_schema).
@@ -260,6 +259,13 @@ function twitter_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 1
+      ),
+      'include_retweets' => array(
+        'description' => t("Boolean flag indicating whether the {twitter_user}'s retweets should be pulled in by the site."),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
       ),
       'last_refresh' => array(
         'description' => t("A UNIX timestamp marking the date Twitter statuses were last fetched on."),
@@ -688,6 +694,21 @@ function twitter_update_6300() {
   return $ret;
 }
 
+function twitter_update_6301() {
+  $ret = array();
+
+  // add additional fields to {twitter_account}
+  db_add_field($ret, 'twitter_account', 'include_retweets',
+               array(
+                 'description' => t("Boolean flag indicating whether the {twitter_user}'s retweets should be pulled in by the site. Currently does not support native retweets."),
+                 'type' => 'int',
+                 'unsigned' => TRUE,
+                 'not null' => TRUE,
+                 'default' => 0
+               ));
+
+   return $ret;
+}
 
 function twitter_uninstall() {
   // Remove tables.

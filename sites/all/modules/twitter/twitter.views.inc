@@ -1,5 +1,4 @@
 <?php
-// $Id: twitter.views.inc,v 1.6.2.1 2009/05/28 06:45:21 walkah Exp $
 /**
  * @file
  * Provide views data and handlers for twitter.module
