@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_timelinemap.inc,v 1.3 2010/07/14 14:55:16 vesnaradivojevic Exp $
+// $Id: views_plugin_style_timelinemap.inc,v 1.4 2011/01/31 10:42:38 vesnaradivojevic Exp $
 
 /**
  * @file views_plugin_style_timelinemap.inc
@@ -215,16 +215,17 @@ class views_plugin_style_timelinemap extends views_plugin_style {
           '#default_value' => $this->options['fields']['link'],
           '#required' => FALSE,
       );
-       $form['fields']['description'] = array(
+/*        $form['fields']['description'] = array(
           '#type' => 'select',
           '#title' => t('Description'),
           '#options' => $field_names,
           '#default_value' => $this->options['fields']['description'],
-      ); 
+      );  */
 	  
 	  // @todo: get_handlers()
 	   $form['fields']['table'] = array(
 		'#type' => 'item',
+		'#title' => t('Fields to be displayed in the info cloud'),
 		'#theme' => 'timelinemap_rearrange_form',
 		'#tree' => TRUE
 	  );
